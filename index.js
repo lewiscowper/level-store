@@ -1,5 +1,6 @@
 var through = require('through');
 var duplexer = require('duplexer');
+var writeStream = require('level-write-stream');
 var liveStream = require('level-live-stream');
 var deleteRange = require('level-delete-range');
 var cap = require('level-capped');
@@ -85,14 +86,14 @@ Store.prototype.createKeyStream = function (opts) {
         k = k.substr(0, k.length - 2)
           + String.fromCharCode(k.charCodeAt(k.length - 1) - 1)
           + '~';
-        next(k); 
+        next(k);
       } else {
         next(_key + '!');
       }
     });
   })();
 
-  return tr;  
+  return tr;
 };
 
 Store.prototype.keys = function (cb) {
@@ -123,7 +124,7 @@ Store.prototype.createWriteStream = function (key, opts) {
       value: chunk
     });
   }).pause();
-  var ws = this.db.createWriteStream(opts);
+  var ws = writeStream(opts);
 
   var dpl = duplexer(input, ws);
   input.pipe(ws);
